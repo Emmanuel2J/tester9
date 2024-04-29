@@ -40,7 +40,7 @@ public class Login extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(Login.this, "Successful",Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(Login.this, MainActivity.class);
+                            Intent intent = new Intent(Login.this, homepage.class);
                             intent.putExtra("email", email); // Pass the email string to the next activity
                             startActivity(intent);
                         }
