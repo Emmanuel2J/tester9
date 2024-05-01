@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_margin="10dp"
     app:cardCornerRadius="3dp"
     android:padding="3dp"
     app:cardElevation="2dp">
@@ -17,9 +17,9 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/imageView"
-            android:layout_width="92dp"
-            android:layout_height="88dp"
-            android:padding="2dp"
+            android:layout_width="120dp"
+            android:layout_height="100dp"
+            android:padding="3dp"
             android:src="@mipmap/ic_launcher"/>
 
         <LinearLayout
@@ -34,7 +34,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textStyle="normal"/>
+                android:textStyle="bold"
+                android:textSize="18sp" />
+
 
             <TextView
                 android:id="@+id/tvPosition"
@@ -49,6 +51,7 @@
                 android:layout_height="wrap_content"
                 android:text=""
                 android:textStyle="normal"/>
+
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
