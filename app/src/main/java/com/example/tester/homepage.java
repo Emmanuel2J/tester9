@@ -1,9 +1,9 @@
 package com.example.tester;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class homepage extends AppCompatActivity {
 
@@ -16,3 +16,5 @@ public class homepage extends AppCompatActivity {
         abc.setText("Hi user with email" + email);
     }
 }
+
+
