@@ -1,9 +1,7 @@
 package com.example.tester;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -19,7 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-public class home extends AppCompatActivity {
+public class service_home extends AppCompatActivity {
     RecyclerView recyclerView;
     ModelAdepter mainAdapter;
     Query databaseQuery;
@@ -27,7 +25,7 @@ public class home extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_service_home);
         String email = getIntent().getStringExtra("email");
         TextView abc = findViewById(R.id.Hi);
         abc.setText("Hi " + email);
@@ -35,7 +33,7 @@ public class home extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        databaseQuery = FirebaseDatabase.getInstance().getReference().child("User");
+        databaseQuery = FirebaseDatabase.getInstance().getReference().child("service");
 
         FirebaseRecyclerOptions<MainModel> options =
                 new FirebaseRecyclerOptions.Builder<MainModel>()
@@ -49,23 +47,6 @@ public class home extends AppCompatActivity {
         Button buttonShowroom = findViewById(R.id.buttonShowroom);
         Button buttonService = findViewById(R.id.buttonService);
 
-        buttonShowroom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to home.java when the Showroom button is clicked
-                Intent intent = new Intent(home.this, home.class);
-                startActivity(intent);
-            }
-        });
-
-        buttonService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to service_home.java when the Service button is clicked
-                Intent intent = new Intent(home.this, service_home.class);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override
