@@ -16,6 +16,9 @@
         android:theme="@style/Theme.Tester"
         tools:targetApi="31">
         <activity
+            android:name=".Showroom_EnquiryActivity"
+            android:exported="false" />
+        <activity
             android:name=".ShowroomDetailsActivity"
             android:exported="false" />
         <activity

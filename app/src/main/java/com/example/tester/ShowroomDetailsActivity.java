@@ -1,5 +1,9 @@
 package com.example.tester;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,5 +31,16 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
         tvPosition.setText(position);
         tvEmail.setText(email);
         Picasso.get().load(image).placeholder(R.drawable.carveno).into(imageView);
+
+        // Add intent to navigate to EnquiryActivity
+        Button buttonEnquiry = findViewById(R.id.buttonEnquiry);
+        buttonEnquiry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShowroomDetailsActivity.this, Showroom_EnquiryActivity.class);
+                intent.putExtra("showroomName", name); // Pass showroom name to EnquiryActivity
+                startActivity(intent);
+            }
+        });
     }
 }

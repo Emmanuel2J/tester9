@@ -49,4 +49,16 @@
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp" />
 
+    <!-- Button to navigate to showroom enquiry activity -->
+    <Button
+        android:id="@+id/buttonEnquiry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enquiry"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:onClick="navigateToEnquiryActivity" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
