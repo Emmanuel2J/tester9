@@ -1,9 +1,9 @@
 package com.example.tester;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,16 +19,13 @@ import com.google.firebase.database.ValueEventListener;
 
 public class service_home extends AppCompatActivity {
     RecyclerView recyclerView;
-    ModelAdepter mainAdapter;
+    ModelAdepter_service mainAdapter;
     Query databaseQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_service_home);
-        String email = getIntent().getStringExtra("email");
-        TextView abc = findViewById(R.id.Hi);
-        abc.setText("Hi " + email);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -40,13 +37,32 @@ public class service_home extends AppCompatActivity {
                         .setQuery(databaseQuery, MainModel.class)
                         .build();
 
-        mainAdapter = new ModelAdepter(options);
+        mainAdapter = new ModelAdepter_service(options) {
+            @Override
+            public void onItemClick(MainModel_service mainModel) {
+
+            }
+        };
         recyclerView.setAdapter(mainAdapter);
+
+        mainAdapter.setOnItemClickListener(new ModelAdepter_service.OnItemClickListener() {
+            @Override
+            public void onItemClick(MainModel mainModel) {
+                // Handle item click here
+                Intent intent = new Intent(service_home.this, ShowroomDetailsActivity.class);
+                intent.putExtra("name", mainModel.getName());
+                intent.putExtra("position", mainModel.getPosition());
+                intent.putExtra("email", mainModel.getEmail());
+                intent.putExtra("image", mainModel.getImage());
+                startActivity(intent);
+            }
+        });
 
         // Adding click listeners for the buttons
         Button buttonShowroom = findViewById(R.id.buttonShowroom);
         Button buttonService = findViewById(R.id.buttonService);
 
+        // Add button click listeners here
     }
 
     @Override

@@ -3,7 +3,9 @@ package com.example.tester;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -12,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,6 +51,7 @@ public class home extends AppCompatActivity {
         // Adding click listeners for the buttons
         Button buttonShowroom = findViewById(R.id.buttonShowroom);
         Button buttonService = findViewById(R.id.buttonService);
+        Button btn = findViewById(R.id.button);
 
         buttonShowroom.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,13 +70,26 @@ public class home extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        Button btn = findViewById(R.id.button);
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(home.this, community_chat.class);
                 intent.putExtra("email", email); // Pass the email string to the next activity
+                startActivity(intent);
+            }
+        });
+
+        // Click listener for RecyclerView items
+        mainAdapter.setOnItemClickListener(new ModelAdepter.OnItemClickListener() {
+            @Override
+            public void onItemClick(MainModel mainModel) {
+                // Handle item click here
+                Intent intent = new Intent(home.this, ShowroomDetailsActivity.class);
+                intent.putExtra("name", mainModel.getName());
+                intent.putExtra("position", mainModel.getPosition());
+                intent.putExtra("email", mainModel.getEmail());
+                intent.putExtra("image", mainModel.getImage());
                 startActivity(intent);
             }
         });

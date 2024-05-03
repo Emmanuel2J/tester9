@@ -1,5 +1,4 @@
 package com.example.tester;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +13,23 @@ import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ModelAdepter extends FirebaseRecyclerAdapter<MainModel,ModelAdepter.ViewHolder> {
+public class ModelAdepter extends FirebaseRecyclerAdapter<MainModel, ModelAdepter.ViewHolder> {
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(MainModel mainModel);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
     public ModelAdepter(@NonNull FirebaseRecyclerOptions<MainModel> options) {
         super(options);
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull ModelAdepter.ViewHolder viewHolder, int i, @NonNull MainModel mainModel) {
-
+    protected void onBindViewHolder(@NonNull ViewHolder viewHolder, int i, @NonNull MainModel mainModel) {
         viewHolder.tvName.setText(mainModel.getName());
         viewHolder.tvPosition.setText(mainModel.getPosition());
         viewHolder.tvEmail.setText(mainModel.getEmail());
@@ -30,31 +38,32 @@ public class ModelAdepter extends FirebaseRecyclerAdapter<MainModel,ModelAdepter
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(viewHolder.imageView);
 
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    listener.onItemClick(mainModel);
+                }
+            }
+        });
     }
 
     @NonNull
     @Override
-    public ModelAdepter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item, parent, false));
     }
 
-
-
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
+        TextView tvName, tvPosition, tvEmail;
         CircleImageView imageView;
-        TextView tvName,tvPosition,tvEmail;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            imageView=itemView.findViewById(R.id.imageView);
-            tvName=itemView.findViewById(R.id.tvName);
-            tvPosition=itemView.findViewById(R.id.tvPosition);
-            tvEmail=itemView.findViewById(R.id.tvEmail);
-
-
+            tvName = itemView.findViewById(R.id.tvName);
+            tvPosition = itemView.findViewById(R.id.tvPosition);
+            tvEmail = itemView.findViewById(R.id.tvEmail);
+            imageView = itemView.findViewById(R.id.imageView);
         }
-
     }
 }
