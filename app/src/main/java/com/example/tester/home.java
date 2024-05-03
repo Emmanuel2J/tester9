@@ -66,6 +66,16 @@ public class home extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        Button btn = findViewById(R.id.button);
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(home.this, community_chat.class);
+                intent.putExtra("email", email); // Pass the email string to the next activity
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -86,6 +96,7 @@ public class home extends AppCompatActivity {
                 Log.e("Firebase", "Error fetching data: " + databaseError.getMessage());
             }
         });
+
     }
 
     @Override
