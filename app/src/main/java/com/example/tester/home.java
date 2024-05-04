@@ -7,24 +7,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 public class home extends AppCompatActivity {
     RecyclerView recyclerView;
-    ModelAdepter mainAdapter;
+    ModelAdapter mainAdapter;
+    EditText searchEditText;
     Query databaseQuery;
 
     @Override
@@ -36,17 +37,31 @@ public class home extends AppCompatActivity {
         abc.setText("Hi " + email);
 
         recyclerView = findViewById(R.id.recyclerView);
+        searchEditText = findViewById(R.id.searchEditText);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        databaseQuery = FirebaseDatabase.getInstance().getReference().child("User");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("User");
+        databaseQuery = databaseReference.orderByChild("name");
 
         FirebaseRecyclerOptions<MainModel> options =
                 new FirebaseRecyclerOptions.Builder<MainModel>()
                         .setQuery(databaseQuery, MainModel.class)
                         .build();
 
-        mainAdapter = new ModelAdepter(options);
+        mainAdapter = new ModelAdapter(options);
         recyclerView.setAdapter(mainAdapter);
+
+        mainAdapter.setOnItemClickListener(new ModelAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(MainModel mainModel) {
+                Intent intent = new Intent(home.this, ShowroomDetailsActivity.class);
+                intent.putExtra("name", mainModel.getName());
+                intent.putExtra("position", mainModel.getPosition());
+                intent.putExtra("email", mainModel.getEmail());
+                intent.putExtra("image", mainModel.getImage());
+                startActivity(intent);
+            }
+        });
 
         // Adding click listeners for the buttons
         Button buttonShowroom = findViewById(R.id.buttonShowroom);
@@ -56,9 +71,13 @@ public class home extends AppCompatActivity {
         buttonShowroom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navigate to home.java when the Showroom button is clicked
-                Intent intent = new Intent(home.this, home.class);
-                startActivity(intent);
+                // Refresh the RecyclerView by recreating the query
+                databaseQuery = databaseReference.orderByChild("name");
+                FirebaseRecyclerOptions<MainModel> refreshedOptions =
+                        new FirebaseRecyclerOptions.Builder<MainModel>()
+                                .setQuery(databaseQuery, MainModel.class)
+                                .build();
+                mainAdapter.updateOptions(refreshedOptions);
             }
         });
 
@@ -80,40 +99,38 @@ public class home extends AppCompatActivity {
             }
         });
 
-        // Click listener for RecyclerView items
-        mainAdapter.setOnItemClickListener(new ModelAdepter.OnItemClickListener() {
+        // Implementing search functionality
+        searchEditText.setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public void onItemClick(MainModel mainModel) {
-                // Handle item click here
-                Intent intent = new Intent(home.this, ShowroomDetailsActivity.class);
-                intent.putExtra("name", mainModel.getName());
-                intent.putExtra("position", mainModel.getPosition());
-                intent.putExtra("email", mainModel.getEmail());
-                intent.putExtra("image", mainModel.getImage());
-                startActivity(intent);
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    String searchText = searchEditText.getText().toString();
+                    performSearch(searchText);
+                    return true;
+                }
+                return false;
             }
         });
+    }
+
+    private void performSearch(String searchText) {
+        databaseQuery = FirebaseDatabase.getInstance().getReference().child("User")
+                .orderByChild("name")
+                .startAt(searchText)
+                .endAt(searchText + "\uf8ff");
+
+        FirebaseRecyclerOptions<MainModel> searchOptions =
+                new FirebaseRecyclerOptions.Builder<MainModel>()
+                        .setQuery(databaseQuery, MainModel.class)
+                        .build();
+
+        mainAdapter.updateOptions(searchOptions);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         mainAdapter.startListening();
-
-        // Add ValueEventListener for error handling
-        databaseQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Data successfully loaded
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // An error occurred while fetching data
-                Log.e("Firebase", "Error fetching data: " + databaseError.getMessage());
-            }
-        });
-
     }
 
     @Override

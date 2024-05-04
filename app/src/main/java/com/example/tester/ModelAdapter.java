@@ -1,7 +1,10 @@
 package com.example.tester;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,9 +14,14 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ModelAdepter extends FirebaseRecyclerAdapter<MainModel, ModelAdepter.ViewHolder> {
+public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapter.ViewHolder> implements Filterable {
+    private List<MainModel> mainModelList;
+    private List<MainModel> mainModelListFull; // Copy of original list for filtering
     private OnItemClickListener listener;
 
     public interface OnItemClickListener {
@@ -24,8 +32,9 @@ public class ModelAdepter extends FirebaseRecyclerAdapter<MainModel, ModelAdepte
         this.listener = listener;
     }
 
-    public ModelAdepter(@NonNull FirebaseRecyclerOptions<MainModel> options) {
+    public ModelAdapter(@NonNull FirebaseRecyclerOptions<MainModel> options) {
         super(options);
+        mainModelListFull = new ArrayList<>();
     }
 
     @Override
@@ -51,7 +60,8 @@ public class ModelAdepter extends FirebaseRecyclerAdapter<MainModel, ModelAdepte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item, parent, false));
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item, parent, false);
+        return new ViewHolder(v);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -65,5 +75,48 @@ public class ModelAdepter extends FirebaseRecyclerAdapter<MainModel, ModelAdepte
             tvEmail = itemView.findViewById(R.id.tvEmail);
             imageView = itemView.findViewById(R.id.imageView);
         }
+    }
+
+    // Filter for search functionality
+    @Override
+    public Filter getFilter() {
+        return mainModelFilter;
+    }
+
+    private Filter mainModelFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<MainModel> filteredList = new ArrayList<>();
+
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(mainModelListFull);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+
+                for (MainModel item : mainModelListFull) {
+                    if (item.getName().toLowerCase().contains(filterPattern) || item.getPosition().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
+
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            mainModelList.clear();
+            mainModelList.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
+
+    @Override
+    public void onDataChanged() {
+        super.onDataChanged();
+        mainModelListFull.clear();
+        mainModelListFull.addAll(getSnapshots());
     }
 }
