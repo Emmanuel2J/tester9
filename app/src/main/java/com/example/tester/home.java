@@ -59,6 +59,8 @@ public class home extends AppCompatActivity {
                 intent.putExtra("position", mainModel.getPosition());
                 intent.putExtra("email", mainModel.getEmail());
                 intent.putExtra("image", mainModel.getImage());
+                intent.putExtra("username", mainModel.getUsername()); // Add the username to the intent
+
                 startActivity(intent);
             }
         });

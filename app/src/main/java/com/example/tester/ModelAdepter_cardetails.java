@@ -46,7 +46,7 @@ public abstract class ModelAdepter_cardetails extends FirebaseRecyclerAdapter<Ma
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.imageView);
+            imageView = itemView.findViewById(R.id.imageView1);
             tvName = itemView.findViewById(R.id.tvName);
             tvPosition = itemView.findViewById(R.id.tvPosition);
             tvEmail = itemView.findViewById(R.id.tvEmail);

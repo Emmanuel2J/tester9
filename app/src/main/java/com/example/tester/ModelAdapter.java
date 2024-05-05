@@ -43,6 +43,8 @@ public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapte
         viewHolder.tvPosition.setText(mainModel.getPosition());
         viewHolder.tvEmail.setText(mainModel.getEmail());
 
+        // Set username here or use it for other purposes
+        String username = mainModel.getUsername();
         Picasso.get().load(mainModel.getImage())
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(viewHolder.imageView);
@@ -73,7 +75,7 @@ public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapte
             tvName = itemView.findViewById(R.id.tvName);
             tvPosition = itemView.findViewById(R.id.tvPosition);
             tvEmail = itemView.findViewById(R.id.tvEmail);
-            imageView = itemView.findViewById(R.id.imageView);
+            imageView = itemView.findViewById(R.id.imageView1);
         }
     }
 

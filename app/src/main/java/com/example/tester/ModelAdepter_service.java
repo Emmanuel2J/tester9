@@ -65,7 +65,7 @@ public abstract class ModelAdepter_service extends FirebaseRecyclerAdapter<MainM
             tvName = itemView.findViewById(R.id.tvName);
             tvPosition = itemView.findViewById(R.id.tvPosition);
             tvEmail = itemView.findViewById(R.id.tvEmail);
-            imageView = itemView.findViewById(R.id.imageView);
+            imageView = itemView.findViewById(R.id.imageView1);
         }
     }
 }
