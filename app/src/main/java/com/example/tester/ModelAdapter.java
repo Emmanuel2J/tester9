@@ -24,6 +24,10 @@ public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapte
     private List<MainModel> mainModelListFull; // Copy of original list for filtering
     private OnItemClickListener listener;
 
+    public void addItem(MainModel mainModel) {
+        mainModelListFull.add(mainModel);
+        notifyItemInserted(mainModelListFull.size() - 1);
+    }
     public interface OnItemClickListener {
         void onItemClick(MainModel mainModel);
     }

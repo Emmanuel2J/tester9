@@ -2,14 +2,11 @@ package com.example.tester;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
@@ -25,8 +21,8 @@ import com.google.firebase.database.Query;
 public class home extends AppCompatActivity {
     RecyclerView recyclerView;
     ModelAdapter mainAdapter;
-    EditText searchEditText;
-    Query databaseQuery;
+    EditText searchEditText, positionSearchEditText;
+    DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,14 +34,14 @@ public class home extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerView);
         searchEditText = findViewById(R.id.searchEditText);
+        positionSearchEditText = findViewById(R.id.positionSearchEditText);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("User");
-        databaseQuery = databaseReference.orderByChild("name");
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("User");
 
         FirebaseRecyclerOptions<MainModel> options =
                 new FirebaseRecyclerOptions.Builder<MainModel>()
-                        .setQuery(databaseQuery, MainModel.class)
+                        .setQuery(databaseReference, MainModel.class)
                         .build();
 
         mainAdapter = new ModelAdapter(options);
@@ -68,16 +64,14 @@ public class home extends AppCompatActivity {
         // Adding click listeners for the buttons
         Button buttonShowroom = findViewById(R.id.buttonShowroom);
         Button buttonService = findViewById(R.id.buttonService);
-        Button btn = findViewById(R.id.button);
 
         buttonShowroom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Refresh the RecyclerView by recreating the query
-                databaseQuery = databaseReference.orderByChild("name");
                 FirebaseRecyclerOptions<MainModel> refreshedOptions =
                         new FirebaseRecyclerOptions.Builder<MainModel>()
-                                .setQuery(databaseQuery, MainModel.class)
+                                .setQuery(databaseReference, MainModel.class)
                                 .build();
                 mainAdapter.updateOptions(refreshedOptions);
             }
@@ -91,6 +85,7 @@ public class home extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        Button btn = findViewById(R.id.button);
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,13 +96,26 @@ public class home extends AppCompatActivity {
             }
         });
 
-        // Implementing search functionality
+        // Implementing search functionality for name
         searchEditText.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    String searchText = searchEditText.getText().toString();
+                    String searchText = searchEditText.getText().toString().trim();
                     performSearch(searchText);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        // Implementing search functionality for position
+        positionSearchEditText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    String searchText = positionSearchEditText.getText().toString().trim();
+                    performPositionSearch(searchText);
                     return true;
                 }
                 return false;
@@ -116,14 +124,26 @@ public class home extends AppCompatActivity {
     }
 
     private void performSearch(String searchText) {
-        databaseQuery = FirebaseDatabase.getInstance().getReference().child("User")
-                .orderByChild("name")
+        Query query = databaseReference.orderByChild("name")
                 .startAt(searchText)
                 .endAt(searchText + "\uf8ff");
 
         FirebaseRecyclerOptions<MainModel> searchOptions =
                 new FirebaseRecyclerOptions.Builder<MainModel>()
-                        .setQuery(databaseQuery, MainModel.class)
+                        .setQuery(query, MainModel.class)
+                        .build();
+
+        mainAdapter.updateOptions(searchOptions);
+    }
+
+    private void performPositionSearch(String searchPosition) {
+        Query query = databaseReference.orderByChild("position")
+                .startAt(searchPosition)
+                .endAt(searchPosition + "\uf8ff");
+
+        FirebaseRecyclerOptions<MainModel> searchOptions =
+                new FirebaseRecyclerOptions.Builder<MainModel>()
+                        .setQuery(query, MainModel.class)
                         .build();
 
         mainAdapter.updateOptions(searchOptions);
