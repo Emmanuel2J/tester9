@@ -1,7 +1,10 @@
 package com.example.tester;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -10,24 +13,32 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 public class home extends AppCompatActivity {
     RecyclerView recyclerView;
     ModelAdapter mainAdapter;
     EditText searchEditText, positionSearchEditText;
     DatabaseReference databaseReference;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean locationPermissionGranted;
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         String email = getIntent().getStringExtra("email");
         TextView abc = findViewById(R.id.Hi);
         abc.setText("Hi " + email);
@@ -121,6 +132,45 @@ public class home extends AppCompatActivity {
                 return false;
             }
         });
+        Button btn2 = findViewById(R.id.button2);
+        btn2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getLocationPermission();
+            }
+        });
+    }
+    private void getLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+            getDeviceLocation();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+    private void getDeviceLocation() {
+        try {
+            if (locationPermissionGranted) {
+                fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                if (location != null) {
+                                    // Use the location
+                                    double latitude = location.getLatitude();
+                                    double longitude = location.getLongitude();
+                                    // Do something with latitude and longitude
+                                    Log.d("Location", "Latitude: " + latitude + ", Longitude: " + longitude);
+                                }
+                            }
+                        });
+            }
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
     }
 
     private void performSearch(String searchText) {

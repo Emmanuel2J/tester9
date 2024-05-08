@@ -72,16 +72,24 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
                             // Retrieve IMAGE1 value
                             String imageUrl = snapshot.child("IMAGE1").getValue(String.class);
 
-                                // Get the image URL from the HashMap
-
-                                Log.d("ShowroomDetails", "Image URL: " + imageUrl);
-                                // Create new ImageView
+                            // Create new ImageView
                             ImageView imageView = new ImageView(ShowroomDetailsActivity.this);
                             // Load image into ImageView using Picasso
                             Picasso.get().load(imageUrl).into(imageView);
+                            // Add OnClickListener to navigate to another activity
+                            imageView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    // Intent to navigate to another activity
+                                    Intent intent = new Intent(ShowroomDetailsActivity.this, InventoryDetailsActivity.class);
+                                    // Pass any data if needed
+                                    intent.putExtra("username", username);
+                                    intent.putExtra("key",snapshot.getKey());
+                                    startActivity(intent);
+                                }
+                            });
                             // Add ImageView to imageContainer LinearLayout
                             imageContainer.addView(imageView);
-
                         }
                         else{
                             Log.d("ShowroomDetails", "DataSnapshot does not exist");
@@ -98,6 +106,7 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
 
             }
         });
+
 
         // Add intent to navigate to EnquiryActivity
         buttonEnquiry.setOnClickListener(new View.OnClickListener() {
