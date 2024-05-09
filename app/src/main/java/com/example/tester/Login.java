@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class Login extends AppCompatActivity {
     EditText mEmail, mPassword;
@@ -39,10 +40,15 @@ public class Login extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
-                            Toast.makeText(Login.this, "Successful",Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(Login.this, home.class);
-                            intent.putExtra("email", email); // Pass the email string to the next activity
-                            startActivity(intent);
+                            FirebaseUser user = fAuth.getCurrentUser();
+                            if (user.isEmailVerified()) {
+                                Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(Login.this, home.class);
+                                intent.putExtra("email", email); // Pass the email string to the next activity
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(Login.this, "Please verify your email first.", Toast.LENGTH_SHORT).show();
+                            }
                         }
                         else{
                             Toast.makeText(Login.this, "Error ! " + task.getException().getMessage(),Toast.LENGTH_SHORT).show();
@@ -51,7 +57,5 @@ public class Login extends AppCompatActivity {
                 });
             }
         });
-
-
     }
 }

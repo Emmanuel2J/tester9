@@ -1,6 +1,5 @@
 package com.example.tester;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,14 +14,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.Objects;
+import com.google.firebase.auth.FirebaseUser;
 
 public class Register extends AppCompatActivity {
     EditText mFullName, mEmail, mPassword;
     Button mRegisterBtn;
-    FirebaseAuth fAuth;
-    ProgressBar progressbar;
+    FirebaseAuth mAuth;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,32 +32,55 @@ public class Register extends AppCompatActivity {
         mPassword = findViewById(R.id.passwordd);
         mRegisterBtn = findViewById(R.id.Register);
 
-        fAuth = FirebaseAuth.getInstance();
-        progressbar = findViewById(R.id.progressBar);
+        mAuth = FirebaseAuth.getInstance();
+        progressBar = findViewById(R.id.progressBar);
 
         mRegisterBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String email = mEmail.getText().toString();
-                String full_name = mFullName.getText().toString();
                 String password = mPassword.getText().toString();
-                progressbar.setVisibility(View.VISIBLE);
-                fAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(Register.this, "User Created",Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(),home.class));
-                        }
-                        else{
-                            Toast.makeText(Register.this, "Error ! " + Objects.requireNonNull(task.getException()).getMessage(),Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                progressBar.setVisibility(View.VISIBLE);
 
-
+                mAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(Register.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                progressBar.setVisibility(View.GONE);
+                                if (task.isSuccessful()) {
+                                    FirebaseUser user = mAuth.getCurrentUser();
+                                    if (user != null) {
+                                        // Send email verification
+                                        user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> emailTask) {
+                                                if (emailTask.isSuccessful()) {
+                                                    // Registration success, you can proceed with additional tasks
+                                                    writeNewUser(user.getUid());
+                                                    updateUser();
+                                                    Toast.makeText(Register.this, "Registration successful. Please check your email for verification.", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    // Email verification sending failed
+                                                    Toast.makeText(Register.this, "Failed to send verification email. " + emailTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    // Registration failed
+                                    Toast.makeText(Register.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
             }
         });
+    }
 
+    private void writeNewUser(String userId) {
+        // Write new user data to your database
+    }
+
+    private void updateUser() {
+        // Update user data
     }
 }
