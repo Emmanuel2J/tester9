@@ -48,7 +48,7 @@ public class InventoryDetailsActivity extends AppCompatActivity {
                     textTransm.setText(dataSnapshot.child("transmission").getValue(String.class));
 
                     for (int i = 1; i <= 5; i++) {
-                        String imageUrl = dataSnapshot.child("IMAGE" + i).getValue(String.class);
+                        String imageUrl = dataSnapshot.child("image_url" + i).getValue(String.class);
                         if (imageUrl != null) {
                             ImageView imageView = new ImageView(InventoryDetailsActivity.this);
                             Picasso.get().load(imageUrl).into(imageView);

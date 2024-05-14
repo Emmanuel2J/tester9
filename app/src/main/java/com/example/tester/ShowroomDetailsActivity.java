@@ -66,11 +66,11 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         Log.d("ShowroomDetails", "Snapshot key: " + snapshot.getKey());
 
-                        if (snapshot.hasChild("IMAGE1")) {
+                        if (snapshot.hasChild("image_url1")) {
                             Log.d("ShowroomDetails", "Found IMAGE1 node");
 
                             // Retrieve IMAGE1 value
-                            String imageUrl = snapshot.child("IMAGE1").getValue(String.class);
+                            String imageUrl = snapshot.child("image_url1").getValue(String.class);
 
                             // Create new ImageView
                             ImageView imageView = new ImageView(ShowroomDetailsActivity.this);
@@ -114,6 +114,7 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(ShowroomDetailsActivity.this, Showroom_EnquiryActivity.class);
                 intent.putExtra("showroomName", name); // Pass showroom name to EnquiryActivity
+                intent.putExtra("username",username);
                 startActivity(intent);
             }
         });

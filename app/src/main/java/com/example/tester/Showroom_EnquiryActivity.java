@@ -31,6 +31,7 @@ public class Showroom_EnquiryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_showroom_enquiry);
 
         showroomName = getIntent().getStringExtra("showroomName");
+        final String username = getIntent().getStringExtra("username"); // Retrieve the username
 
         editTextEnquiry = findViewById(R.id.editTextEnquiry);
         buttonSubmitEnquiry = findViewById(R.id.buttonSubmitEnquiry);
@@ -40,7 +41,7 @@ public class Showroom_EnquiryActivity extends AppCompatActivity {
 
         if (user != null) {
             userEmail = user.getEmail();
-            databaseReference = FirebaseDatabase.getInstance().getReference().child("Enquiries");
+            databaseReference = FirebaseDatabase.getInstance().getReference().child(username).child("Enquiries");
         }
 
         buttonSubmitEnquiry.setOnClickListener(new View.OnClickListener() {
@@ -52,8 +53,9 @@ public class Showroom_EnquiryActivity extends AppCompatActivity {
                         // Store enquiry details in the database with showroom name
                         String enquiryId = databaseReference.push().getKey();
                         if (enquiryId != null) {
-                            databaseReference.child(showroomName).child(enquiryId).child("email").setValue(userEmail);
-                            databaseReference.child(showroomName).child(enquiryId).child("enquiry").setValue(enquiry);
+                            databaseReference.child(enquiryId).child("email").setValue(userEmail);
+                            databaseReference.child(enquiryId).child("enquiry").setValue(enquiry);
+                            databaseReference.child(enquiryId).child("name").setValue(showroomName);
                             Toast.makeText(Showroom_EnquiryActivity.this, "Enquiry submitted successfully", Toast.LENGTH_SHORT).show();
                             finish();
                         } else {
