@@ -1,8 +1,12 @@
 package com.example.tester;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -12,6 +16,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import android.widget.Toast;
 
 public class InventoryDetailsActivity extends AppCompatActivity {
 
@@ -33,6 +38,7 @@ public class InventoryDetailsActivity extends AppCompatActivity {
         TextView textFuel = findViewById(R.id.textFuel);
         TextView textMileage = findViewById(R.id.textMileage);
         TextView textTransm = findViewById(R.id.textTransm);
+        LinearLayout variantContainer = findViewById(R.id.variantContainer);
 
         usernameRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -61,6 +67,33 @@ public class InventoryDetailsActivity extends AppCompatActivity {
                             imageContainer.addView(imageView);
                         }
                     }
+
+                    DataSnapshot variantsSnapshot = dataSnapshot.child("variants");
+                    for (DataSnapshot variantSnapshot : variantsSnapshot.getChildren()) {
+                        String variantName = variantSnapshot.child("model").getValue(String.class);
+                        String variantPrice = variantSnapshot.child("price").getValue(String.class);
+
+                        View variantItem = LayoutInflater.from(InventoryDetailsActivity.this)
+                                .inflate(R.layout.variant_item, variantContainer, false);
+
+                        TextView variantNameTextView = variantItem.findViewById(R.id.variantNameTextView);
+                        TextView variantPriceTextView = variantItem.findViewById(R.id.variantPriceTextView);
+
+                        variantNameTextView.setText(variantName);
+                        variantPriceTextView.setText(variantPrice);
+
+                        variantItem.setOnClickListener(v -> {
+                            // Handle variant click
+                            Intent intent = new Intent(InventoryDetailsActivity.this, VariantDetailsAcitivty.class);
+                            intent.putExtra("key",variantSnapshot.getKey());
+                            intent.putExtra("carId",key);
+                            intent.putExtra("username",username);
+                            startActivity(intent);
+                            Toast.makeText(InventoryDetailsActivity.this, "Clicked on " + variantName, Toast.LENGTH_SHORT).show();
+                        });
+
+                        variantContainer.addView(variantItem);
+                    }
                 }
             }
 
@@ -70,6 +103,4 @@ public class InventoryDetailsActivity extends AppCompatActivity {
             }
         });
     }
-
 }
-

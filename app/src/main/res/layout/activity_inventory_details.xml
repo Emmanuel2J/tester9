@@ -20,7 +20,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal" />
-
     </HorizontalScrollView>
 
     <TextView
@@ -92,8 +91,8 @@
         android:id="@+id/textEngine"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="232dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginStart="224dp"
+        android:layout_marginTop="16dp"
         android:textSize="24sp"
         app:layout_constraintStart_toEndOf="@+id/textView10"
         app:layout_constraintTop_toBottomOf="@+id/textView13" />
@@ -124,10 +123,39 @@
         android:layout_width="wrap_content"
         android:layout_height="32dp"
         android:layout_marginStart="4dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="16dp"
         android:text="Engine"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textView13" />
+
+    <TextView
+        android:id="@+id/textView14"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:text="Variants"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView10" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/textView14"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/variantContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </androidx.core.widget.NestedScrollView>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

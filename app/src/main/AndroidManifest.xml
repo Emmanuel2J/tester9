@@ -18,6 +18,9 @@
         android:theme="@style/Theme.Tester"
         tools:targetApi="31">
         <activity
+            android:name=".VariantDetailsAcitivty"
+            android:exported="false" />
+        <activity
             android:name=".SplashScreenActivity2"
             android:exported="false" />
         <activity
