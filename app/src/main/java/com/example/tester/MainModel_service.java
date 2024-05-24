@@ -6,15 +6,17 @@ public class MainModel_service {
     private String email;
     private String image;
 
+    private String username;
     public MainModel_service() {
         // Default constructor required for Firebase
     }
 
-    public MainModel_service(String name, String position, String email, String image) {
+    public MainModel_service(String name, String position, String email, String image, String username) {
         this.name = name;
         this.position = position;
         this.email = email;
         this.image = image;
+        this.username = username;
     }
 
     public String getName() {
@@ -31,5 +33,9 @@ public class MainModel_service {
 
     public String getImage() {
         return image;
+    }
+
+    public String getUsername() {
+        return username; // Getter method for username
     }
 }

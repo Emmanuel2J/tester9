@@ -12,13 +12,29 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import android.os.Handler;
 
 public class service_home extends AppCompatActivity {
+    private ViewPager2 viewPager;
+    private BannerAdapter bannerAdapter;
+    private ArrayList<Banner> bannerList;
+    private Handler handler;
+    private Runnable runnable;
+    private Timer timer;
+
     RecyclerView recyclerView;
     ModelAdapter mainAdapter;
     EditText searchEditText, positionSearchEditText;
@@ -32,6 +48,16 @@ public class service_home extends AppCompatActivity {
         TextView abc = findViewById(R.id.Hi);
         abc.setText("Hi " + email);
 
+        // Initialize banner components
+        viewPager = findViewById(R.id.viewPager);
+        bannerList = new ArrayList<>();
+        bannerAdapter = new BannerAdapter(bannerList);
+        viewPager.setAdapter(bannerAdapter);
+
+        loadBannersFromFirebase();
+        setupAutoScroll();
+
+        // Initialize RecyclerView components
         recyclerView = findViewById(R.id.recyclerView);
         searchEditText = findViewById(R.id.searchEditText);
         positionSearchEditText = findViewById(R.id.positionSearchEditText);
@@ -124,6 +150,50 @@ public class service_home extends AppCompatActivity {
         });
     }
 
+    private void loadBannersFromFirebase() {
+        DatabaseReference bannersRef = FirebaseDatabase.getInstance().getReference().child("offerbanner");
+        bannersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                bannerList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    String imageUrl = dataSnapshot.child("image_url").getValue(String.class);
+                    Banner banner = new Banner(imageUrl);
+                    bannerList.add(banner);
+                }
+                bannerAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle possible errors.
+            }
+        });
+    }
+
+    private void setupAutoScroll() {
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                int currentItem = viewPager.getCurrentItem();
+                int totalItems = bannerAdapter.getItemCount();
+                if (currentItem < totalItems - 1) {
+                    viewPager.setCurrentItem(currentItem + 1);
+                } else {
+                    viewPager.setCurrentItem(0);
+                }
+            }
+        };
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(runnable);
+            }
+        }, 3000, 3000);
+    }
+
     private void performSearch(String searchText) {
         Query query = databaseReference.orderByChild("name")
                 .startAt(searchText)
@@ -160,5 +230,6 @@ public class service_home extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         mainAdapter.stopListening();
+        timer.cancel();
     }
 }

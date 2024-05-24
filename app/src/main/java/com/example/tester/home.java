@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -13,23 +14,39 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class home extends AppCompatActivity {
-    RecyclerView recyclerView;
-    ModelAdapter mainAdapter;
-    EditText searchEditText, positionSearchEditText;
-    DatabaseReference databaseReference;
+    private ViewPager2 viewPager;
+    private BannerAdapter bannerAdapter;
+    private ArrayList<Banner> bannerList;
+    private Handler handler;
+    private Runnable runnable;
+    private Timer timer;
+
+    private RecyclerView recyclerView;
+    private ModelAdapter mainAdapter;
+    private EditText searchEditText, positionSearchEditText;
+    private DatabaseReference databaseReference;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
     private FusedLocationProviderClient fusedLocationClient;
@@ -39,10 +56,24 @@ public class home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        String email = getIntent().getStringExtra("email");
-        TextView abc = findViewById(R.id.Hi);
-        abc.setText("Hi " + email);
 
+        // Set up toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        String email = getIntent().getStringExtra("email");
+        getSupportActionBar().setTitle("Hi " + email);
+
+        // Initialize banner components
+        viewPager = findViewById(R.id.viewPager);
+        bannerList = new ArrayList<>();
+        bannerAdapter = new BannerAdapter(bannerList);
+        viewPager.setAdapter(bannerAdapter);
+
+        loadBannersFromFirebase();
+        setupAutoScroll();
+
+        // Existing RecyclerView setup
         recyclerView = findViewById(R.id.recyclerView);
         searchEditText = findViewById(R.id.searchEditText);
         positionSearchEditText = findViewById(R.id.positionSearchEditText);
@@ -96,8 +127,8 @@ public class home extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        Button btn = findViewById(R.id.button);
 
+        Button btn = findViewById(R.id.button);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,6 +163,7 @@ public class home extends AppCompatActivity {
                 return false;
             }
         });
+
         Button btn2 = findViewById(R.id.button2);
         btn2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,6 +172,65 @@ public class home extends AppCompatActivity {
             }
         });
     }
+
+    private void loadBannersFromFirebase() {
+        DatabaseReference bannersRef = FirebaseDatabase.getInstance().getReference().child("offerbanner");
+        bannersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                bannerList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    String imageUrl = dataSnapshot.child("image_url").getValue(String.class);
+                    Banner banner = new Banner(imageUrl);
+                    bannerList.add(banner);
+                }
+                bannerAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle possible errors.
+            }
+        });
+    }
+
+
+    private void setupAutoScroll() {
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                int currentItem = viewPager.getCurrentItem();
+                int totalItems = bannerAdapter.getItemCount();
+                if (currentItem < totalItems - 1) {
+                    viewPager.setCurrentItem(currentItem + 1);
+                } else {
+                    viewPager.setCurrentItem(0);
+                }
+            }
+        };
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(runnable);
+            }
+        }, 3000, 3000);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mainAdapter.startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mainAdapter.stopListening();
+        timer.cancel();
+    }
+
     private void getLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -151,6 +242,7 @@ public class home extends AppCompatActivity {
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
+
     private void getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
@@ -197,17 +289,5 @@ public class home extends AppCompatActivity {
                         .build();
 
         mainAdapter.updateOptions(searchOptions);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mainAdapter.startListening();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mainAdapter.stopListening();
     }
 }
