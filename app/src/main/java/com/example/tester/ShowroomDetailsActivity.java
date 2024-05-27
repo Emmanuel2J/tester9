@@ -1,5 +1,8 @@
 package com.example.tester;
 
+import android.app.DatePickerDialog;
+import android.os.Bundle;
+import android.view.View;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,7 +11,19 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Calendar;
+import java.util.HashMap;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,8 +33,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
-
-import java.util.HashMap;
 
 public class ShowroomDetailsActivity extends AppCompatActivity {
 
@@ -42,15 +55,14 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
         TextView tvEmail = findViewById(R.id.tvEmail);
         Button buttonEnquiry = findViewById(R.id.buttonEnquiry);
         ImageView imageView1 = findViewById(R.id.imageView1);
-
         LinearLayout imageContainer = findViewById(R.id.imageContainer); // LinearLayout to hold ImageViews
+        Button buttonBookAppointment = findViewById(R.id.buttonBookAppointment); // Button for booking appointment
 
         // Set text views
         tvName.setText(name);
         tvPosition.setText(position);
         tvEmail.setText(email);
         Picasso.get().load(image).placeholder(R.drawable.carveno).into(imageView1);
-
 
         // Firebase reference to the username node
         DatabaseReference usernameRef = FirebaseDatabase.getInstance().getReference().child(username);
@@ -84,16 +96,14 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
                                     Intent intent = new Intent(ShowroomDetailsActivity.this, InventoryDetailsActivity.class);
                                     // Pass any data if needed
                                     intent.putExtra("username", username);
-                                    intent.putExtra("key",snapshot.getKey());
+                                    intent.putExtra("key", snapshot.getKey());
                                     startActivity(intent);
                                 }
                             });
                             // Add ImageView to imageContainer LinearLayout
                             imageContainer.addView(imageView);
-                        }
-                        else{
+                        } else {
                             Log.d("ShowroomDetails", "DataSnapshot does not exist");
-
                         }
                     }
                 }
@@ -103,10 +113,8 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Handle error
                 Log.e("ShowroomDetails", "DatabaseError: " + databaseError.getMessage());
-
             }
         });
-
 
         // Add intent to navigate to EnquiryActivity
         buttonEnquiry.setOnClickListener(new View.OnClickListener() {
@@ -114,9 +122,23 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(ShowroomDetailsActivity.this, Showroom_EnquiryActivity.class);
                 intent.putExtra("showroomName", name); // Pass showroom name to EnquiryActivity
-                intent.putExtra("username",username);
+                intent.putExtra("username", username);
                 startActivity(intent);
             }
         });
+
+        // Add intent to navigate to BookAppointmentActivity
+        buttonBookAppointment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigateToBookAppointmentActivity(v);
+            }
+        });
+    }
+
+    // Method to navigate to the BookAppointmentActivity
+    public void navigateToBookAppointmentActivity(View view) {
+        Intent intent = new Intent(ShowroomDetailsActivity.this, BookAppointmentActivity.class);
+        startActivity(intent);
     }
 }
