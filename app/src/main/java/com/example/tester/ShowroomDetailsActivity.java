@@ -131,14 +131,15 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
         buttonBookAppointment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                navigateToBookAppointmentActivity(v);
+                navigateToBookAppointmentActivity(v, name);
             }
         });
     }
 
     // Method to navigate to the BookAppointmentActivity
-    public void navigateToBookAppointmentActivity(View view) {
+    public void navigateToBookAppointmentActivity(View view, String showroomName) {
         Intent intent = new Intent(ShowroomDetailsActivity.this, BookAppointmentActivity.class);
+        intent.putExtra("SERVICE_NAME", showroomName);
         startActivity(intent);
     }
 }

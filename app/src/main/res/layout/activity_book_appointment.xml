@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -8,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="ExtraText">
 
         <EditText
             android:id="@+id/etCustomerName"
@@ -35,13 +37,15 @@
             android:layout_height="wrap_content"
             android:hint="Model" />
 
+        <!-- Modify the EditText for Appointment Date -->
         <EditText
             android:id="@+id/etAppointmentDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Appointment Date"
             android:focusable="false"
-            android:clickable="true" />
+            android:clickable="true"
+            android:onClick="showDatePickerDialog" /> <!-- Move android:onClick inside the EditText tag -->
 
         <Button
             android:id="@+id/buttonSubmitAppointment"
