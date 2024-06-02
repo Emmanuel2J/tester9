@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Tester"
         tools:targetApi="31">
+
         <activity
             android:name=".VariantDetailsAcitivty"
             android:exported="false" />
@@ -69,6 +70,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Add new activities here -->
+        <activity
+            android:name=".AddRatingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewRatingActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

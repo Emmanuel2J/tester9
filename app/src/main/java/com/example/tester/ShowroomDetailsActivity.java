@@ -1,8 +1,5 @@
 package com.example.tester;
 
-import android.app.DatePickerDialog;
-import android.os.Bundle;
-import android.view.View;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,18 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.Calendar;
-import java.util.HashMap;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -47,7 +33,7 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
         String email = getIntent().getStringExtra("email");
         String image = getIntent().getStringExtra("image");
         String username = getIntent().getStringExtra("username"); // Retrieve the username
-        Log.d("Username kiti", username);
+        Log.d("Username", username);
 
         // Initialize views
         TextView tvName = findViewById(R.id.tvName);
@@ -57,6 +43,8 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
         ImageView imageView1 = findViewById(R.id.imageView1);
         LinearLayout imageContainer = findViewById(R.id.imageContainer); // LinearLayout to hold ImageViews
         Button buttonBookAppointment = findViewById(R.id.buttonBookAppointment); // Button for booking appointment
+        Button buttonAddRating = findViewById(R.id.buttonAddRating); // Button for adding rating
+        Button buttonViewRating = findViewById(R.id.buttonViewRating); // Button for viewing rating
 
         // Set text views
         tvName.setText(name);
@@ -103,7 +91,7 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
                             // Add ImageView to imageContainer LinearLayout
                             imageContainer.addView(imageView);
                         } else {
-                            Log.d("ShowroomDetails", "DataSnapshot does not exist");
+                            Log.d("ShowroomDetails", "DataSnapshot does not have image_url1");
                         }
                     }
                 }
@@ -132,6 +120,28 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 navigateToBookAppointmentActivity(v, name);
+            }
+        });
+
+        // Add intent to navigate to AddRatingActivity
+        buttonAddRating.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShowroomDetailsActivity.this, AddRatingActivity.class);
+                intent.putExtra("showroomName", name);
+                intent.putExtra("username", username);
+                startActivity(intent);
+            }
+        });
+
+        // Add intent to navigate to ViewRatingActivity
+        buttonViewRating.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShowroomDetailsActivity.this, ViewRatingActivity.class);
+                intent.putExtra("showroomName", name);
+                intent.putExtra("username", username);
+                startActivity(intent);
             }
         });
     }
