@@ -1,5 +1,6 @@
 package com.example.tester;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapte
         mainModelListFull.add(mainModel);
         notifyItemInserted(mainModelListFull.size() - 1);
     }
+
     public interface OnItemClickListener {
         void onItemClick(MainModel mainModel);
     }
@@ -38,7 +40,8 @@ public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapte
 
     public ModelAdapter(@NonNull FirebaseRecyclerOptions<MainModel> options) {
         super(options);
-        mainModelListFull = new ArrayList<>();
+        mainModelList = new ArrayList<>(options.getSnapshots());
+        mainModelListFull = new ArrayList<>(options.getSnapshots());
     }
 
     @Override
@@ -47,7 +50,6 @@ public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapte
         viewHolder.tvPosition.setText(mainModel.getPosition());
         viewHolder.tvEmail.setText(mainModel.getEmail());
 
-        // Set username here or use it for other purposes
         String username = mainModel.getUsername();
         Picasso.get().load(mainModel.getImage())
                 .placeholder(R.drawable.ic_launcher_background)
@@ -58,6 +60,7 @@ public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapte
             public void onClick(View view) {
                 if (listener != null) {
                     listener.onItemClick(mainModel);
+                    Log.d("Showroom Location(model adapter)", "Latitude: " + mainModel.getLatitude() + ", Longitude: " + mainModel.getLongitude());
                 }
             }
         });
@@ -124,5 +127,14 @@ public class ModelAdapter extends FirebaseRecyclerAdapter<MainModel, ModelAdapte
         super.onDataChanged();
         mainModelListFull.clear();
         mainModelListFull.addAll(getSnapshots());
+    }
+
+    public void updateList(List<MainModel> showroomList) {
+        mainModelList.clear();
+        mainModelList.addAll(showroomList);
+        mainModelListFull.clear();
+        mainModelListFull.addAll(showroomList);
+        notifyDataSetChanged();
+        Log.d("List Updation: ", "updateList() called");
     }
 }

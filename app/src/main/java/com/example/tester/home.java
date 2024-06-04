@@ -31,6 +31,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -54,6 +57,7 @@ public class home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Set up toolbar
@@ -68,7 +72,6 @@ public class home extends AppCompatActivity {
         bannerList = new ArrayList<>();
         bannerAdapter = new BannerAdapter(bannerList);
         viewPager.setAdapter(bannerAdapter);
-
         loadBannersFromFirebase();
         setupAutoScroll();
 
@@ -79,13 +82,13 @@ public class home extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         databaseReference = FirebaseDatabase.getInstance().getReference().child("User");
-
         FirebaseRecyclerOptions<MainModel> options =
                 new FirebaseRecyclerOptions.Builder<MainModel>()
                         .setQuery(databaseReference, MainModel.class)
                         .build();
 
         mainAdapter = new ModelAdapter(options);
+
         recyclerView.setAdapter(mainAdapter);
 
         mainAdapter.setOnItemClickListener(new ModelAdapter.OnItemClickListener() {
@@ -97,6 +100,7 @@ public class home extends AppCompatActivity {
                 intent.putExtra("email", mainModel.getEmail());
                 intent.putExtra("image", mainModel.getImage());
                 intent.putExtra("username", mainModel.getUsername()); // Add the username to the intent
+                Log.d("Showroom Location", "Latitude: " + mainModel.getLatitude() + ", Longitude: " + mainModel.getLongitude());
 
                 startActivity(intent);
             }
@@ -110,11 +114,24 @@ public class home extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Refresh the RecyclerView by recreating the query
-                FirebaseRecyclerOptions<MainModel> refreshedOptions =
-                        new FirebaseRecyclerOptions.Builder<MainModel>()
-                                .setQuery(databaseReference, MainModel.class)
-                                .build();
-                mainAdapter.updateOptions(refreshedOptions);
+                databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<MainModel> showroomList = new ArrayList<>();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            MainModel showroom = dataSnapshot.getValue(MainModel.class);
+                            if (showroom != null) {
+                                showroomList.add(showroom);
+                            }
+                        }
+                        mainAdapter.updateList(showroomList);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Handle possible errors.
+                    }
+                });
             }
         });
 
@@ -163,13 +180,15 @@ public class home extends AppCompatActivity {
             }
         });
 
-        Button btn2 = findViewById(R.id.button2);
-        btn2.setOnClickListener(new View.OnClickListener() {
+        Button button2 = findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Check for location permissions and get the device location
                 getLocationPermission();
             }
         });
+
     }
 
     private void loadBannersFromFirebase() {
@@ -193,6 +212,18 @@ public class home extends AppCompatActivity {
         });
     }
 
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        double earthRadius = 6371; // Radius of the earth in km
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = earthRadius * c; // Distance in km
+        return distance;
+    }
 
     private void setupAutoScroll() {
         handler = new Handler();
@@ -250,11 +281,41 @@ public class home extends AppCompatActivity {
                             @Override
                             public void onSuccess(Location location) {
                                 if (location != null) {
-                                    // Use the location
-                                    double latitude = location.getLatitude();
-                                    double longitude = location.getLongitude();
-                                    // Do something with latitude and longitude
-                                    Log.d("Location", "Latitude: " + latitude + ", Longitude: " + longitude);
+                                    double userLatitude = location.getLatitude();
+                                    double userLongitude = location.getLongitude();
+
+                                    // Get the list of showrooms and sort them based on the distance
+                                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            List<MainModel> showroomList = new ArrayList<>();
+                                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                                MainModel showroom = dataSnapshot.getValue(MainModel.class);
+                                                if (showroom != null) {
+                                                    showroomList.add(showroom);
+                                                }
+                                            }
+
+                                            Collections.sort(showroomList, new Comparator<MainModel>() {
+                                                @Override
+                                                public int compare(MainModel s1, MainModel s2) {
+                                                    double distanceToS1 = calculateDistance(userLatitude, userLongitude,
+                                                            Double.parseDouble(s1.getLatitude()), Double.parseDouble(s1.getLongitude()));
+                                                    double distanceToS2 = calculateDistance(userLatitude, userLongitude,
+                                                            Double.parseDouble(s2.getLatitude()), Double.parseDouble(s2.getLongitude()));
+                                                    return Double.compare(distanceToS1, distanceToS2);
+                                                }
+                                            });
+
+                                            // Update the adapter with the sorted list
+                                            mainAdapter.updateList(showroomList);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            // Handle possible errors.
+                                        }
+                                    });
                                 }
                             }
                         });
@@ -269,12 +330,24 @@ public class home extends AppCompatActivity {
                 .startAt(searchText)
                 .endAt(searchText + "\uf8ff");
 
-        FirebaseRecyclerOptions<MainModel> searchOptions =
-                new FirebaseRecyclerOptions.Builder<MainModel>()
-                        .setQuery(query, MainModel.class)
-                        .build();
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<MainModel> searchResults = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    MainModel showroom = dataSnapshot.getValue(MainModel.class);
+                    if (showroom != null) {
+                        searchResults.add(showroom);
+                    }
+                }
+                mainAdapter.updateList(searchResults);
+            }
 
-        mainAdapter.updateOptions(searchOptions);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle possible errors.
+            }
+        });
     }
 
     private void performPositionSearch(String searchPosition) {
@@ -282,11 +355,23 @@ public class home extends AppCompatActivity {
                 .startAt(searchPosition)
                 .endAt(searchPosition + "\uf8ff");
 
-        FirebaseRecyclerOptions<MainModel> searchOptions =
-                new FirebaseRecyclerOptions.Builder<MainModel>()
-                        .setQuery(query, MainModel.class)
-                        .build();
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<MainModel> searchResults = new ArrayList<>();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    MainModel showroom = dataSnapshot.getValue(MainModel.class);
+                    if (showroom != null) {
+                        searchResults.add(showroom);
+                    }
+                }
+                mainAdapter.updateList(searchResults);
+            }
 
-        mainAdapter.updateOptions(searchOptions);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle possible errors.
+            }
+        });
     }
 }
