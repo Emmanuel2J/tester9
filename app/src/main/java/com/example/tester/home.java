@@ -330,24 +330,12 @@ public class home extends AppCompatActivity {
                 .startAt(searchText)
                 .endAt(searchText + "\uf8ff");
 
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<MainModel> searchResults = new ArrayList<>();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    MainModel showroom = dataSnapshot.getValue(MainModel.class);
-                    if (showroom != null) {
-                        searchResults.add(showroom);
-                    }
-                }
-                mainAdapter.updateList(searchResults);
-            }
+        FirebaseRecyclerOptions<MainModel> searchOptions =
+                new FirebaseRecyclerOptions.Builder<MainModel>()
+                        .setQuery(query, MainModel.class)
+                        .build();
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Handle possible errors.
-            }
-        });
+        mainAdapter.updateOptions(searchOptions);
     }
 
     private void performPositionSearch(String searchPosition) {
@@ -355,23 +343,11 @@ public class home extends AppCompatActivity {
                 .startAt(searchPosition)
                 .endAt(searchPosition + "\uf8ff");
 
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<MainModel> searchResults = new ArrayList<>();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    MainModel showroom = dataSnapshot.getValue(MainModel.class);
-                    if (showroom != null) {
-                        searchResults.add(showroom);
-                    }
-                }
-                mainAdapter.updateList(searchResults);
-            }
+        FirebaseRecyclerOptions<MainModel> searchOptions =
+                new FirebaseRecyclerOptions.Builder<MainModel>()
+                        .setQuery(query, MainModel.class)
+                        .build();
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Handle possible errors.
-            }
-        });
+        mainAdapter.updateOptions(searchOptions);
     }
 }

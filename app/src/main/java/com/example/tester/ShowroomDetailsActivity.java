@@ -147,24 +147,31 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
         // Add intent to navigate to Enquiry activity
         buttonEnquiry.setOnClickListener(v -> {
             Intent intent = new Intent(ShowroomDetailsActivity.this, Showroom_EnquiryActivity.class);
+            intent.putExtra("username", username);
+            intent.putExtra("showroomName",name);
             startActivity(intent);
         });
 
         // Add intent to navigate to Booking activity
         buttonBookAppointment.setOnClickListener(v -> {
             Intent intent = new Intent(ShowroomDetailsActivity.this, BookAppointmentActivity.class);
+            intent.putExtra("SERVICE_NAME",name);
             startActivity(intent);
         });
 
         // Add intent to navigate to Add Rating activity
         buttonAddRating.setOnClickListener(v -> {
             Intent intent = new Intent(ShowroomDetailsActivity.this, AddRatingActivity.class);
+            intent.putExtra("username", username);
+            intent.putExtra("showroomName",name);
             startActivity(intent);
         });
 
         // Add intent to navigate to View Rating activity
         buttonViewRating.setOnClickListener(v -> {
             Intent intent = new Intent(ShowroomDetailsActivity.this, ViewRatingActivity.class);
+            intent.putExtra("username", username);
+            intent.putExtra("showroomName",name);
             startActivity(intent);
         });
     }
