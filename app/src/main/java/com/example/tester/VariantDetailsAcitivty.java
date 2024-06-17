@@ -1,13 +1,14 @@
 package com.example.tester;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,14 +22,15 @@ public class VariantDetailsAcitivty extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_variant_details);
 
+        String username = "Emmanuel"; // Replace with actual username logic
+        String carId = "-Ny5WNaZjlbT5Or2qdxH"; // Replace with actual carId logic
         String key = getIntent().getStringExtra("key");
-        String username = getIntent().getStringExtra("username");
-        String carId = getIntent().getStringExtra("carId");
 
-         Log.d("key", key);
-
-
-        DatabaseReference variantRef = FirebaseDatabase.getInstance().getReference().child(username).child(carId).child("variants").child(key);
+        DatabaseReference variantRef = FirebaseDatabase.getInstance().getReference()
+                .child(username)
+                .child(carId)
+                .child("variants")
+                .child(key);
 
         TextView engineTextView = findViewById(R.id.engineTextView);
         TextView mileageTextView = findViewById(R.id.mileageTextView);
@@ -48,31 +50,30 @@ public class VariantDetailsAcitivty extends AppCompatActivity {
                     transmissionTextView.setText(dataSnapshot.child("transmission").getValue(String.class));
                     seatingCapacityTextView.setText(dataSnapshot.child("seating_capacity").getValue(String.class));
                     airbagsTextView.setText(dataSnapshot.child("no_of_airbags").getValue(String.class));
-                    variantPricee.setText("Rs. " + dataSnapshot.child("price").getValue(String.class));
+
+                    String currentPrice = dataSnapshot.child("price").getValue(String.class);
+                    variantPricee.setText("Rs. " + currentPrice);
+
+                    // Check if offers node exists for the variant
+                    DataSnapshot offersSnapshot = dataSnapshot.child("offers");
+                    if (offersSnapshot.exists()) {
+                        for (DataSnapshot offer : offersSnapshot.getChildren()) {
+                            String discountPrice = offer.child("discount_price").getValue(String.class);
+                            if (discountPrice != null && !discountPrice.isEmpty()) {
+                                // Display current price with strike-through and discounted price
+                                SpannableString spannableString = new SpannableString("Rs. " + currentPrice + "   Rs. " + discountPrice);
+                                spannableString.setSpan(new StrikethroughSpan(), 0, currentPrice.length() + 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                variantPricee.setText(spannableString);
+                                break; // Assuming only one discount applies at a time, you can adjust logic if multiple discounts are possible
+                            }
+                        }
+                    }
 
                     // Display interior colors
-                    interiorColorsContainer.removeAllViews();
-                    for (DataSnapshot colorSnapshot : dataSnapshot.child("interior_colors").getChildren()) {
-                        String colorHex = colorSnapshot.getValue(String.class);
-                        View colorView = new View(VariantDetailsAcitivty.this);
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(50, 50);
-                        params.setMargins(8, 0, 8, 0);
-                        colorView.setLayoutParams(params);
-                        colorView.setBackgroundColor(android.graphics.Color.parseColor(colorHex));
-                        interiorColorsContainer.addView(colorView);
-                    }
+                    displayColors(interiorColorsContainer, dataSnapshot.child("interior_colors"));
 
                     // Display exterior colors
-                    exteriorColorsContainer.removeAllViews();
-                    for (DataSnapshot colorSnapshot : dataSnapshot.child("exterior_colors").getChildren()) {
-                        String colorHex = colorSnapshot.getValue(String.class);
-                        View colorView = new View(VariantDetailsAcitivty.this);
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(50, 50);
-                        params.setMargins(8, 0, 8, 0);
-                        colorView.setLayoutParams(params);
-                        colorView.setBackgroundColor(android.graphics.Color.parseColor(colorHex));
-                        exteriorColorsContainer.addView(colorView);
-                    }
+                    displayColors(exteriorColorsContainer, dataSnapshot.child("exterior_colors"));
                 }
             }
 
@@ -81,5 +82,19 @@ public class VariantDetailsAcitivty extends AppCompatActivity {
                 Log.e("VariantDetails", "DatabaseError: " + databaseError.getMessage());
             }
         });
+    }
+
+    // Helper method to display colors
+    private void displayColors(LinearLayout container, DataSnapshot colorsSnapshot) {
+        container.removeAllViews();
+        for (DataSnapshot colorSnapshot : colorsSnapshot.getChildren()) {
+            String colorHex = colorSnapshot.getValue(String.class);
+            View colorView = new View(VariantDetailsAcitivty.this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(50, 50);
+            params.setMargins(8, 0, 8, 0);
+            colorView.setLayoutParams(params);
+            colorView.setBackgroundColor(android.graphics.Color.parseColor(colorHex));
+            container.addView(colorView);
+        }
     }
 }

@@ -45,6 +45,7 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
         Button buttonBookAppointment = findViewById(R.id.buttonBookAppointment); // Button for booking appointment
         Button buttonAddRating = findViewById(R.id.buttonAddRating); // Button for adding rating
         Button buttonViewRating = findViewById(R.id.buttonViewRating); // Button for viewing rating
+        LinearLayout offerContainer = findViewById(R.id.offerContainer); // LinearLayout to hold offer views
 
         // Set text views
         tvName.setText(name);
@@ -94,6 +95,45 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
                             Log.d("ShowroomDetails", "DataSnapshot does not have image_url1");
                         }
                     }
+
+                    // Retrieve and display offers
+                    if (dataSnapshot.hasChild("offers")) {
+                        DataSnapshot offersSnapshot = dataSnapshot.child("offers");
+                        for (DataSnapshot offerSnapshot : offersSnapshot.getChildren()) {
+                            String offerImageUrl = offerSnapshot.child("image_url").getValue(String.class);
+                            String offerDescription = offerSnapshot.child("offer_description").getValue(String.class);
+
+                            // Check if the offer image URL is unique before displaying
+                            boolean isUnique = true;
+                            for (int i = 0; i < offerContainer.getChildCount(); i++) {
+                                View view = offerContainer.getChildAt(i);
+                                if (view instanceof ImageView) {
+                                    ImageView existingImageView = (ImageView) view;
+                                    String existingImageUrl = (String) existingImageView.getTag();
+                                    if (existingImageUrl != null && existingImageUrl.equals(offerImageUrl)) {
+                                        isUnique = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (isUnique) {
+                                // Create new ImageView for offer image
+                                ImageView offerImageView = new ImageView(ShowroomDetailsActivity.this);
+                                // Set image URL as tag to avoid duplication
+                                offerImageView.setTag(offerImageUrl);
+                                // Load image into ImageView using Picasso
+                                Picasso.get().load(offerImageUrl).into(offerImageView);
+                                // Create TextView for offer description
+                                TextView offerDescriptionView = new TextView(ShowroomDetailsActivity.this);
+                                offerDescriptionView.setText(offerDescription);
+
+                                // Add ImageView and TextView to offerContainer LinearLayout
+                                offerContainer.addView(offerImageView);
+                                offerContainer.addView(offerDescriptionView);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -104,52 +144,28 @@ public class ShowroomDetailsActivity extends AppCompatActivity {
             }
         });
 
-        // Add intent to navigate to EnquiryActivity
-        buttonEnquiry.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ShowroomDetailsActivity.this, Showroom_EnquiryActivity.class);
-                intent.putExtra("showroomName", name); // Pass showroom name to EnquiryActivity
-                intent.putExtra("username", username);
-                startActivity(intent);
-            }
+        // Add intent to navigate to Enquiry activity
+        buttonEnquiry.setOnClickListener(v -> {
+            Intent intent = new Intent(ShowroomDetailsActivity.this, Showroom_EnquiryActivity.class);
+            startActivity(intent);
         });
 
-        // Add intent to navigate to BookAppointmentActivity
-        buttonBookAppointment.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                navigateToBookAppointmentActivity(v, name);
-            }
+        // Add intent to navigate to Booking activity
+        buttonBookAppointment.setOnClickListener(v -> {
+            Intent intent = new Intent(ShowroomDetailsActivity.this, BookAppointmentActivity.class);
+            startActivity(intent);
         });
 
-        // Add intent to navigate to AddRatingActivity
-        buttonAddRating.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ShowroomDetailsActivity.this, AddRatingActivity.class);
-                intent.putExtra("showroomName", name);
-                intent.putExtra("username", username);
-                startActivity(intent);
-            }
+        // Add intent to navigate to Add Rating activity
+        buttonAddRating.setOnClickListener(v -> {
+            Intent intent = new Intent(ShowroomDetailsActivity.this, AddRatingActivity.class);
+            startActivity(intent);
         });
 
-        // Add intent to navigate to ViewRatingActivity
-        buttonViewRating.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ShowroomDetailsActivity.this, ViewRatingActivity.class);
-                intent.putExtra("showroomName", name);
-                intent.putExtra("username", username);
-                startActivity(intent);
-            }
+        // Add intent to navigate to View Rating activity
+        buttonViewRating.setOnClickListener(v -> {
+            Intent intent = new Intent(ShowroomDetailsActivity.this, ViewRatingActivity.class);
+            startActivity(intent);
         });
-    }
-
-    // Method to navigate to the BookAppointmentActivity
-    public void navigateToBookAppointmentActivity(View view, String showroomName) {
-        Intent intent = new Intent(ShowroomDetailsActivity.this, BookAppointmentActivity.class);
-        intent.putExtra("SERVICE_NAME", showroomName);
-        startActivity(intent);
     }
 }

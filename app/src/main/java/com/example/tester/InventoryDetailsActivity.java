@@ -34,10 +34,7 @@ public class InventoryDetailsActivity extends AppCompatActivity {
 
         LinearLayout imageContainer = findViewById(R.id.imageContainer);
         TextView carNameTextView = findViewById(R.id.carNameTextView);
-        TextView textEngine = findViewById(R.id.textEngine);
-        TextView textFuel = findViewById(R.id.textFuel);
-        TextView textMileage = findViewById(R.id.textMileage);
-        TextView textTransm = findViewById(R.id.textTransm);
+
         LinearLayout variantContainer = findViewById(R.id.variantContainer);
 
         usernameRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -48,10 +45,7 @@ public class InventoryDetailsActivity extends AppCompatActivity {
                     carNameTextView.setText(carName);
 
                     // Set the values of text views
-                    textEngine.setText(dataSnapshot.child("engine").getValue(String.class));
-                    textFuel.setText(dataSnapshot.child("fuel_type").getValue(String.class));
-                    textMileage.setText(dataSnapshot.child("mileage").getValue(String.class));
-                    textTransm.setText(dataSnapshot.child("transmission").getValue(String.class));
+
 
                     for (int i = 1; i <= 5; i++) {
                         String imageUrl = dataSnapshot.child("image_url" + i).getValue(String.class);
@@ -78,16 +72,22 @@ public class InventoryDetailsActivity extends AppCompatActivity {
 
                         TextView variantNameTextView = variantItem.findViewById(R.id.variantNameTextView);
                         TextView variantPriceTextView = variantItem.findViewById(R.id.variantPriceTextView);
+                        TextView offerIndicatorTextView = variantItem.findViewById(R.id.offerIndicatorTextView);
 
                         variantNameTextView.setText(variantName);
                         variantPriceTextView.setText(variantPrice);
 
+                        // Check if the variant has offers and update the indicator
+                        if (variantSnapshot.hasChild("offers")) {
+                            offerIndicatorTextView.setVisibility(View.VISIBLE);
+                        }
+
                         variantItem.setOnClickListener(v -> {
                             // Handle variant click
                             Intent intent = new Intent(InventoryDetailsActivity.this, VariantDetailsAcitivty.class);
-                            intent.putExtra("key",variantSnapshot.getKey());
-                            intent.putExtra("carId",key);
-                            intent.putExtra("username",username);
+                            intent.putExtra("key", variantSnapshot.getKey());
+                            intent.putExtra("carId", key);
+                            intent.putExtra("username", username);
                             startActivity(intent);
                             Toast.makeText(InventoryDetailsActivity.this, "Clicked on " + variantName, Toast.LENGTH_SHORT).show();
                         });
