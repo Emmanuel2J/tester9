@@ -22,8 +22,11 @@ public class VariantDetailsAcitivty extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_variant_details);
 
-        String username = "Emmanuel"; // Replace with actual username logic
-        String carId = "-Ny5WNaZjlbT5Or2qdxH"; // Replace with actual carId logic
+
+        String username = getIntent().getStringExtra("username");
+
+
+        String carId = getIntent().getStringExtra("carId");
         String key = getIntent().getStringExtra("key");
 
         DatabaseReference variantRef = FirebaseDatabase.getInstance().getReference()
